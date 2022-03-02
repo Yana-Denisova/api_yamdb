@@ -24,7 +24,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=50, choices=ROLES,
         default=USER, verbose_name='Роль')
-    
+
     class Meta:
         ordering = ['username']
 
@@ -44,12 +44,14 @@ class Genres(models.Model):
     def __str__(self):
         return self.name
 
+
 class Categories(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
 
     def __str__(self):
         return self.name
+
 
 class Titles(models.Model):
     name = models.CharField(max_length=200)
@@ -68,6 +70,7 @@ class Titles(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Review(models.Model):
     SCORES = [(i, str(i)) for i in range(1, 11)]
@@ -96,6 +99,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:50]
-
-
-
