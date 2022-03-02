@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
@@ -8,6 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.filters import SearchFilter
 
 from reviews.models import Genres, Categories, Titles
 from .permissions import IsAdminRole, IsReadOnly
@@ -109,13 +111,22 @@ class GenresViewSet(CreateListDeleteViewSet):
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
     permission_classes = [IsReadOnly|IsAdminRole]
-
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+    lookup_field = 'slug'
 
 class CategoriesViewSet(CreateListDeleteViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
     permission_classes = [IsReadOnly|IsAdminRole]
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+    lookup_field = 'slug'
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
+    queryset = Titles.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitlesSerializer
+    permission_classes = [IsReadOnly|IsAdminRole]
+    pagination_class = PageNumberPagination

@@ -32,14 +32,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class GenresSerializer(serializers.ModelSerializer):
-    name = serializers.SlugRelatedField(
-        queryset = Genres.objects.all(),
-        slug_field='name'
-    )
-    slug = serializers.SlugRelatedField(
-        queryset = Genres.objects.all(),
-        slug_field='slug'
-    )
     
     class Meta:
         fields = ('name', 'slug')
@@ -48,14 +40,6 @@ class GenresSerializer(serializers.ModelSerializer):
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
-    name = serializers.SlugRelatedField(
-        queryset = Categories.objects.all(),
-        slug_field='name'
-    )
-    slug = serializers.SlugRelatedField(
-        queryset = Categories.objects.all(),
-        slug_field='slug'
-    )
     
     class Meta:
         fields = ('name', 'slug')
@@ -64,19 +48,17 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class TitlesSerializer(serializers.ModelSerializer):
-    name = serializers.SlugRelatedField(
-        queryset = Titles.objects.all(),
+
+    categorie = serializers.SlugRelatedField(
+        queryset = Categories.objects.all(),
         slug_field='name')
-    today = date.today()
-    year = serializers.IntegerField(max_value = int(today.year))
-    description = serializers.SlugRelatedField(
-        queryset = Titles.objects.all(),
-        slug_field='description',
-    )
-    #categorie = serializers.ChoiceField(choices = )
-    #genre = serializers.MultipleChoiceField(choices = )
+    genre = serializers.SlugRelatedField(
+        queryset = Genres.objects.all(),
+        slug_field='name',
+        many=True)
     
     class Meta:
         fields = '__all__'
         read_only_fields = ('id',)
+        print('id')
         model = Titles
