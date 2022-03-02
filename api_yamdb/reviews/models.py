@@ -4,16 +4,19 @@ from django.db import models
 
 
 class User(AbstractUser):
-    USER = 'USER'
-    MODERATOR = 'MODERATOR'
-    ADMIN = 'ADMIN'
+    # USER = 'Пользователь'
+    # MODERATOR = 'Модератор '
+    # ADMIN = 'Администратор'
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
     ROLES = (
         (USER, 'user'),
         (MODERATOR, 'moderator'),
         (ADMIN, 'admin'),
     )
     username = models.CharField(
-        max_length=150, validators=[RegexValidator(regex=r'^[\w.@+-]+$')],
+        max_length=150, validators=[RegexValidator(regex=r'^[\w.@+-]+\Z')],
         unique=True, blank=False, null=False)
     email = models.EmailField(
         max_length=254, unique=True, blank=False, null=False)
@@ -21,12 +24,17 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=50, choices=ROLES,
         default=USER, verbose_name='Роль')
+    
+    class Meta:
+        ordering = ['username']
+
     @property
     def is_admin(self):
-        return self.role == self.ADMIN or self.is_staff
+        return self.role == self.ADMIN or self.is_superuser
+
     @property
     def is_moderator(self):
-        return self.role == self.MODERATOR or self.is_superuser
+        return self.role == self.MODERATOR
 
 
 class Genres(models.Model):
@@ -43,6 +51,23 @@ class Categories(models.Model):
     def __str__(self):
         return self.name
 
+class Titles(models.Model):
+    name = models.CharField(max_length=200)
+    year = models.IntegerField()
+    description = models.TextField()
+    genre = models.ForeignKey(
+        Genres,
+        related_name="titles",
+        on_delete=models.CASCADE,
+    )
+    categorie = models.ForeignKey(
+        Categories,
+        related_name="titles",
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return self.name
 
 class Review(models.Model):
     SCORES = [(i, str(i)) for i in range(1, 11)]
@@ -73,23 +98,4 @@ class Comment(models.Model):
         return self.text[:50]
 
 
-class Titles(models.Model):
-    name = models.CharField(max_length=200)
-    year = models.IntegerField()
-    rating = models.ForeignKey(
-        Review,
-        related_name="rating",
-        on_delete=models.CASCADE,
-    )
-    description = models.TextField()
-    genre = models.ForeignKey(
-        Genres,
-        related_name="genre",
-    )
-    categorie = models.ForeignKey(
-        Categories,
-        related_name="categorie",
-    )
 
-    def __str__(self):
-        return self.name
