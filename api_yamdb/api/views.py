@@ -5,19 +5,19 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend, CharFilter, FilterSet, NumberFilter
 
-from reviews.models import Genres, Categories, Title
-from .permissions import IsAdminRole, IsReadOnly
+from reviews.models import Genres, Categories, Title, Review, Comment
+from .permissions import IsAdminRole, IsReadOnly, AuthorAdminModerOrReadOnly
 from .serializers import (
     SendCodeSerializer, SendTokenSerializer, UserSerializer,
     GenresSerializer, TitlesPostSerializer, CategoriesSerializer,
-    TitlesGetSerializer,
+    TitlesGetSerializer, ReviewSerializer, CommentSerializer
     )
 
 User = get_user_model()
@@ -144,3 +144,37 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             return TitlesGetSerializer
         return TitlesPostSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = (AuthorAdminModerOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        title_id = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        return title_id.reviews.all()
+
+    def perform_create(self, serializer):
+        title_id = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        serializer.save(author=self.request.user, title=title_id)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (AuthorAdminModerOrReadOnly,)
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        review_id = get_object_or_404(
+            Review,
+            review_id=self.kwargs['review_id']
+        )
+        return Comment.objects.filter(review_id=review_id)
+
+    def perform_create(self, serializer):
+        review_id = get_object_or_404(
+            Review,
+            review_id=self.kwargs['review_id']
+        )
+        serializer.save(author=self.request.user, review=review_id)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
-
-from reviews.models import User, Genres, Categories, Title
+from rest_framework.relations import SlugRelatedField
+from reviews.models import User, Genres, Categories, Title, Review, Comment
 
 
 class SendCodeSerializer(serializers.Serializer):
@@ -77,3 +77,30 @@ class TitlesPostSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = SlugRelatedField(slug_field='username', read_only=True)
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        model = Review
+
+    def validate(self, data):
+        if self.context['view'].request.method == 'POST':
+            title_id = self.context['view'].kwargs['title_id']
+            if Review.objects.filter(
+                title_id=title_id,
+                author=self.context['request'].user
+            ).exists():
+                raise serializers.ValidationError(
+                    'На одно произведение можно оставить только один отзыв')
+        return data
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = SlugRelatedField(slug_field='username', read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Comment
