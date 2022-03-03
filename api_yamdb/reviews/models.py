@@ -59,7 +59,7 @@ class Titles(models.Model):
         Genres,
         related_name="titles",
     )
-    categorie = models.ForeignKey(
+    category = models.ForeignKey(
         Categories,
         related_name="titles",
         on_delete=models.CASCADE,
@@ -95,6 +95,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:50]
-
-
-

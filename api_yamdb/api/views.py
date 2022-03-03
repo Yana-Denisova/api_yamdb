@@ -10,12 +10,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend, CharFilter, FilterSet, NumberFilter
 
 from reviews.models import Genres, Categories, Titles
 from .permissions import IsAdminRole, IsReadOnly
 from .serializers import (
     SendCodeSerializer, SendTokenSerializer, UserSerializer,
-    GenresSerializer, TitlesSerializer, CategoriesSerializer,
+    GenresSerializer, TitlesPostSerializer, CategoriesSerializer,
+    TitlesGetSerializer,
     )
 
 User = get_user_model()
@@ -125,8 +127,20 @@ class CategoriesViewSet(CreateListDeleteViewSet):
     search_fields = ['name']
     lookup_field = 'slug'
 
+
+class TitlesFilter(FilterSet):
+    genre = CharFilter(field_name='genre__slug')
+    category = CharFilter(field_name='category__slug')
+    year = NumberFilter()
+    name = CharFilter(lookup_expr='icontains')
+
+
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.annotate(rating=Avg('reviews__score'))
-    serializer_class = TitlesSerializer
-    permission_classes = [IsReadOnly|IsAdminRole]
-    pagination_class = PageNumberPagination
+    permission_classes = [IsReadOnly | IsAdminRole]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitlesFilter
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitlesGetSerializer
+        return TitlesPostSerializer
