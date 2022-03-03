@@ -1,7 +1,5 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-from datetime import date
-
 from reviews.models import User, Genres, Categories, Titles, Review, Comment
 
 
@@ -32,15 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class GenresSerializer(serializers.ModelSerializer):
-    name = serializers.SlugRelatedField(
-        queryset=Genres.objects.all(),
-        slug_field='name'
-    )
-    slug = serializers.SlugRelatedField(
-        queryset=Genres.objects.all(),
-        slug_field='slug'
-    )
-
+    
     class Meta:
         fields = ('name', 'slug')
         read_only_fields = ('id',)
@@ -48,37 +38,44 @@ class GenresSerializer(serializers.ModelSerializer):
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
-    name = serializers.SlugRelatedField(
-        queryset=Categories.objects.all(),
-        slug_field='name'
-    )
-    slug = serializers.SlugRelatedField(
-        queryset=Categories.objects.all(),
-        slug_field='slug'
-    )
-
+    
     class Meta:
         fields = ('name', 'slug')
         read_only_fields = ('id',)
         model = Categories
 
-
-class TitlesSerializer(serializers.ModelSerializer):
+class СategorySerializer(serializers.ModelSerializer):
     name = serializers.SlugRelatedField(
-        queryset=Titles.objects.all(),
+        queryset = Categories.objects.all(),
         slug_field='name')
-    today = date.today()
-    year = serializers.IntegerField(max_value=int(today.year))
-    description = serializers.SlugRelatedField(
-        queryset=Titles.objects.all(),
-        slug_field='description',
+
+    class Meta:
+        model = Categories
+        fields = ('name',)
+        read_only_fields = ('id',)
+
+class TitlesGetSerializer(serializers.ModelSerializer):
+    genre = GenresSerializer(many=True, read_only=True)
+    category = CategoriesSerializer(read_only=True)
+    
+    class Meta():
+        fields = '__all__'
+        read_only_fields = ('id',)
+        model = Titles
+
+class TitlesPostSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        queryset=Genres.objects.all(),
+        slug_field='slug',
+        many=True
     )
-    # categorie = serializers.ChoiceField(choices = )
-    # genre = serializers.MultipleChoiceField(choices = )
+    category = serializers.SlugRelatedField(
+        queryset=Categories.objects.all(),
+        slug_field='slug',
+    )
 
     class Meta:
         fields = '__all__'
-        read_only_fields = ('id',)
         model = Titles
 
 
@@ -90,13 +87,14 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
 
     def validate(self, data):
-        title_id = self.context['view'].kwargs['title_id']
-        if Review.objects.filter(
-            title_id=title_id,
-            author=self.context['request'].user
-        ).exists():
-            raise serializers.ValidationError(
-                'На одно произведение можно оставить только один отзыв')
+        if self.context['view'].request.method == 'POST':
+            title_id = self.context['view'].kwargs['title_id']
+            if Review.objects.filter(
+                title_id=title_id,
+                author=self.context['request'].user
+            ).exists():
+                raise serializers.ValidationError(
+                    'На одно произведение можно оставить только один отзыв')
         return data
 
 

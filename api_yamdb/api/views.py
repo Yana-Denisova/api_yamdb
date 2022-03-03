@@ -1,21 +1,24 @@
+from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets, mixins, permissions, pagination
+from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simple_jwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend, CharFilter, FilterSet, NumberFilter
 
 from reviews.models import Genres, Categories, Titles, Review, Comment
 from .permissions import IsAdminRole, IsReadOnly, AuthorAdminModerOrReadOnly
 from .serializers import (
     SendCodeSerializer, SendTokenSerializer, UserSerializer,
-    GenresSerializer, TitlesSerializer, CategoriesSerializer,
-    CommentSerializer, ReviewSerializer
-)
+    GenresSerializer, TitlesPostSerializer, CategoriesSerializer,
+    TitlesGetSerializer, ReviewSerializer, CommentSerializer
+    )
 
 User = get_user_model()
 token_generator = PasswordResetTokenGenerator()
@@ -102,34 +105,51 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class CreateListDeleteViewSet(
-    mixins.CreateModelMixin, mixins.ListModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
+class CreateListDeleteViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.DestroyModelMixin,
+                          viewsets.GenericViewSet):
     pass
-
 
 class GenresViewSet(CreateListDeleteViewSet):
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
-    permission_classes = [IsReadOnly | IsAdminRole]
-
+    permission_classes = [IsReadOnly|IsAdminRole]
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+    lookup_field = 'slug'
 
 class CategoriesViewSet(CreateListDeleteViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
-    permission_classes = [IsReadOnly | IsAdminRole]
+    permission_classes = [IsReadOnly|IsAdminRole]
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+    lookup_field = 'slug'
+
+
+class TitlesFilter(FilterSet):
+    genre = CharFilter(field_name='genre__slug')
+    category = CharFilter(field_name='category__slug')
+    year = NumberFilter()
+    name = CharFilter(lookup_expr='icontains')
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+    queryset = Titles.objects.annotate(rating=Avg('reviews__score'))
+    permission_classes = [IsReadOnly | IsAdminRole]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitlesFilter
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitlesGetSerializer
+        return TitlesPostSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly)
-    pagination_class = pagination.LimitOffsetPagination
+    permission_classes = (AuthorAdminModerOrReadOnly,)
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         title_id = get_object_or_404(Titles, pk=self.kwargs['title_id'])
@@ -143,7 +163,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (AuthorAdminModerOrReadOnly,)
-    pagination_class = pagination.LimitOffsetPagination
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         review_id = get_object_or_404(

@@ -24,7 +24,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=50, choices=ROLES,
         default=USER, verbose_name='Роль')
-
+    
     class Meta:
         ordering = ['username']
 
@@ -44,7 +44,6 @@ class Genres(models.Model):
     def __str__(self):
         return self.name
 
-
 class Categories(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
@@ -52,17 +51,15 @@ class Categories(models.Model):
     def __str__(self):
         return self.name
 
-
 class Titles(models.Model):
     name = models.CharField(max_length=200)
     year = models.IntegerField()
     description = models.TextField()
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genres,
         related_name="titles",
-        on_delete=models.CASCADE,
     )
-    categorie = models.ForeignKey(
+    category = models.ForeignKey(
         Categories,
         related_name="titles",
         on_delete=models.CASCADE,
@@ -71,7 +68,6 @@ class Titles(models.Model):
     def __str__(self):
         return self.name
 
-
 class Review(models.Model):
     SCORES = [(i, str(i)) for i in range(1, 11)]
     text = models.TextField()
@@ -79,12 +75,18 @@ class Review(models.Model):
         User, on_delete=models.CASCADE, related_name='reviews'
     )
     score = models.IntegerField(
-        choices=SCORES,
+        choices=SCORES, blank=True
     )
     pub_date = models.DateTimeField(auto_now_add=True)
     title = models.ForeignKey(
         Titles, on_delete=models.CASCADE, related_name='reviews'
     )
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['title', 'author'],
+                                    name='one_review'),
+        ]
 
 
 class Comment(models.Model):
@@ -99,3 +101,4 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:50]
+
