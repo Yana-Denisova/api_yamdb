@@ -8,10 +8,8 @@ router_v1.register('users', UserViewSet)
 
 auth_urls = [
     path('signup/', send_confirmation_code, name='send_confirmation_code'),
-    path('token/', send_auth_token, name='send_token')
-]
+    path('token/', send_auth_token, name='send_token')]
 
 urlpatterns = [
     path('v1/auth/', include(auth_urls)),
-    path('v1/', include(router_v1.urls)),
-]
+    path('v1/', include(router_v1.urls))]

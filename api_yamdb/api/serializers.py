@@ -5,11 +5,9 @@ from reviews.models import User
 
 
 class SendCodeSerializer(serializers.Serializer):
-    email = serializers.EmailField(
-    )
+    email = serializers.EmailField()
     username = serializers.CharField(
-        max_length=150,
-    )
+        max_length=150)
 
     def validate_username(self, value):
         if 'me' == value.lower():
@@ -26,5 +24,5 @@ class SendTokenSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         fields = (
-            'first_name', 'last_name', 'username', 'bio', 'email', 'role',)
+            'first_name', 'last_name', 'username', 'bio', 'email', 'role')
         model = User
