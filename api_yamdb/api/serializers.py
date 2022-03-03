@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-from reviews.models import User, Genres, Categories, Titles, Review, Comment
+
+from reviews.models import User, Genres, Categories, Title, Review, Comment
 
 
 class SendCodeSerializer(serializers.Serializer):
@@ -30,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class GenresSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         fields = ('name', 'slug')
         read_only_fields = ('id',)
@@ -38,15 +39,16 @@ class GenresSerializer(serializers.ModelSerializer):
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         fields = ('name', 'slug')
         read_only_fields = ('id',)
         model = Categories
 
+
 class СategorySerializer(serializers.ModelSerializer):
     name = serializers.SlugRelatedField(
-        queryset = Categories.objects.all(),
+        queryset=Categories.objects.all(),
         slug_field='name')
 
     class Meta:
@@ -54,14 +56,17 @@ class СategorySerializer(serializers.ModelSerializer):
         fields = ('name',)
         read_only_fields = ('id',)
 
+
 class TitlesGetSerializer(serializers.ModelSerializer):
     genre = GenresSerializer(many=True, read_only=True)
     category = CategoriesSerializer(read_only=True)
-    
+    rating = serializers.IntegerField()
+
     class Meta():
         fields = '__all__'
         read_only_fields = ('id',)
-        model = Titles
+        model = Title
+
 
 class TitlesPostSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
@@ -76,7 +81,7 @@ class TitlesPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -102,5 +107,5 @@ class CommentSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
