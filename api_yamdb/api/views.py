@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend, CharFilter, FilterSet, NumberFilter
 
-from reviews.models import Genres, Categories, Titles
+from reviews.models import Genres, Categories, Title
 from .permissions import IsAdminRole, IsReadOnly
 from .serializers import (
     SendCodeSerializer, SendTokenSerializer, UserSerializer,
@@ -136,7 +136,7 @@ class TitlesFilter(FilterSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.annotate(rating=Avg('reviews__score'))
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = [IsReadOnly | IsAdminRole]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitlesFilter

@@ -51,7 +51,7 @@ class Categories(models.Model):
     def __str__(self):
         return self.name
 
-class Titles(models.Model):
+class Title(models.Model):
     name = models.CharField(max_length=200)
     year = models.IntegerField()
     description = models.TextField()
@@ -79,7 +79,7 @@ class Review(models.Model):
     )
     pub_date = models.DateTimeField(auto_now_add=True)
     title = models.ForeignKey(
-        Titles, on_delete=models.CASCADE, related_name='reviews'
+        Title, on_delete=models.CASCADE, related_name='reviews'
     )
 
 

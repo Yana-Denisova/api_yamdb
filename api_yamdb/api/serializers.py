@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reviews.models import User, Genres, Categories, Titles
+from reviews.models import User, Genres, Categories, Title
 
 
 class SendCodeSerializer(serializers.Serializer):
@@ -61,7 +61,7 @@ class TitlesGetSerializer(serializers.ModelSerializer):
     class Meta():
         fields = '__all__'
         read_only_fields = ('id',)
-        model = Titles
+        model = Title
 
 class TitlesPostSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
@@ -76,4 +76,4 @@ class TitlesPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title
