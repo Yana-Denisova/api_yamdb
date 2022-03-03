@@ -24,7 +24,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=50, choices=ROLES,
         default=USER, verbose_name='Роль')
-    
+
     class Meta:
         ordering = ['username']
 
@@ -41,15 +41,23 @@ class Genres(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
+    class Meta:
+        ordering = ['name']
+
     def __str__(self):
         return self.name
+
 
 class Categories(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
 
+    class Meta:
+        ordering = ['name']
+
     def __str__(self):
         return self.name
+
 
 class Title(models.Model):
     name = models.CharField(max_length=200)
@@ -68,6 +76,7 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
+
 class Review(models.Model):
     SCORES = [(i, str(i)) for i in range(1, 11)]
     text = models.TextField()
@@ -81,12 +90,16 @@ class Review(models.Model):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews'
     )
-    
+
     class Meta:
+        ordering = ['-pub_date']
         constraints = [
             models.UniqueConstraint(fields=['title', 'author'],
                                     name='one_review'),
         ]
+
+    def __str__(self):
+        return self.title
 
 
 class Comment(models.Model):
@@ -98,6 +111,9 @@ class Comment(models.Model):
         User, on_delete=models.CASCADE, related_name='comments'
     )
     pub_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-pub_date']
 
     def __str__(self):
         return self.text[:50]
