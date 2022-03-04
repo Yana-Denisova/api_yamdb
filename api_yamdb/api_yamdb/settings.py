@@ -114,13 +114,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'PAGE_SIZE': 100,
-}
+    'PAGE_SIZE': 100}
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
+    'AUTH_HEADER_TYPES': ('Bearer',)}
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'

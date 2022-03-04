@@ -23,6 +23,9 @@ class User(AbstractUser):
     class Meta:
         ordering = ['username']
 
+    def __str__(self):
+        return self.username
+
     @property
     def is_admin(self):
         return self.role == self.ADMIN or self.is_superuser
@@ -60,13 +63,11 @@ class Title(models.Model):
     description = models.TextField()
     genre = models.ManyToManyField(
         Genres,
-        related_name="titles",
-    )
+        related_name="titles")
     category = models.ForeignKey(
         Categories,
         related_name="titles",
-        on_delete=models.CASCADE,
-    )
+        on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -76,22 +77,17 @@ class Review(models.Model):
     SCORES = [(i, str(i)) for i in range(1, 11)]
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviews'
-    )
-    score = models.IntegerField(
-        choices=SCORES, blank=True
-    )
+        User, on_delete=models.CASCADE, related_name='reviews')
+    score = models.IntegerField(choices=SCORES, blank=True)
     pub_date = models.DateTimeField(auto_now_add=True)
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='reviews'
-    )
+        Title, on_delete=models.CASCADE, related_name='reviews')
 
     class Meta:
         ordering = ['-pub_date']
         constraints = [
-            models.UniqueConstraint(fields=['title', 'author'],
-                                    name='one_review'),
-        ]
+            models.UniqueConstraint(
+                fields=['title', 'author'], name='one_review')]
 
     def __str__(self):
         return self.title
@@ -99,12 +95,10 @@ class Review(models.Model):
 
 class Comment(models.Model):
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name='comments'
-    )
+        Review, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments'
-    )
+        User, on_delete=models.CASCADE, related_name='comments')
     pub_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
