@@ -4,17 +4,13 @@ from django.db import models
 
 
 class User(AbstractUser):
-    # USER = 'Пользователь'
-    # MODERATOR = 'Модератор '
-    # ADMIN = 'Администратор'
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
     ROLES = (
         (USER, 'user'),
         (MODERATOR, 'moderator'),
-        (ADMIN, 'admin'),
-    )
+        (ADMIN, 'admin'))
     username = models.CharField(
         max_length=150, validators=[RegexValidator(regex=r'^[\w.@+-]+\Z')],
         unique=True, blank=False, null=False)
@@ -22,8 +18,7 @@ class User(AbstractUser):
         max_length=254, unique=True, blank=False, null=False)
     bio = models.TextField(max_length=500, blank=True, verbose_name='О себе')
     role = models.CharField(
-        max_length=50, choices=ROLES,
-        default=USER, verbose_name='Роль')
+        max_length=50, choices=ROLES, default=USER, verbose_name='Роль')
 
     class Meta:
         ordering = ['username']
