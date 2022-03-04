@@ -54,6 +54,7 @@ class TitlesGetSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
         model = Title
 
+
 class TitlesPostSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         queryset=Genres.objects.all(),
