@@ -2,8 +2,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import (CharFilter, DjangoFilterBackend,
-                                           FilterSet, NumberFilter)
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
@@ -14,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Categories, Genres, Review, Title, User
+from .filters import TitlesFilter
 from .permissions import AuthorAdminModerOrReadOnly, IsAdminRole, IsReadOnly
 from .serializers import (CategoriesSerializer, CommentSerializer,
                           GenresSerializer, ReviewSerializer,
@@ -114,13 +114,6 @@ class CategoriesViewSet(CreateListDeleteViewSet):
     filter_backends = [SearchFilter]
     search_fields = ['name']
     lookup_field = 'slug'
-
-
-class TitlesFilter(FilterSet):
-    genre = CharFilter(field_name='genre__slug')
-    category = CharFilter(field_name='category__slug')
-    year = NumberFilter()
-    name = CharFilter(lookup_expr='icontains')
 
 
 class TitleViewSet(viewsets.ModelViewSet):
