@@ -41,6 +41,8 @@ class Genre(models.Model):
     slug = models.SlugField(unique=True)
 
     class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
         ordering = ['name']
 
     def __str__(self):
@@ -52,6 +54,8 @@ class Category(models.Model):
     slug = models.SlugField(unique=True, max_length=50)
 
     class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
         ordering = ['name']
 
     def __str__(self):
@@ -64,11 +68,17 @@ class Title(models.Model):
     description = models.TextField()
     genre = models.ManyToManyField(
         Genre,
-        related_name="titles")
+        related_name="titles",
+        verbose_name="жанр")
     category = models.ForeignKey(
         Category,
         related_name="titles",
+        verbose_name="категория",
         on_delete=models.CASCADE)
+    
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
         return self.name
