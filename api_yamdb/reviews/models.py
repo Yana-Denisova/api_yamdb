@@ -80,7 +80,7 @@ class Title(models.Model):
         verbose_name="категория",
         db_index=True,
         on_delete=models.CASCADE)
-    
+
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
