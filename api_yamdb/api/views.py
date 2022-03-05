@@ -30,13 +30,8 @@ token_generator = PasswordResetTokenGenerator()
 def send_confirmation_code(request):
     serializer = SendCodeSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    email = request.data.get('email')
-    username = request.data.get('username')
-    if (User.objects.filter(email=email).first()
-       != User.objects.filter(username=username).first()):
-        return Response(
-            {'detail': 'Имя не соответствует email'},
-            status=status.HTTP_400_BAD_REQUEST)
+    email = serializer.validated_data.get('email')
+    username = serializer.validated_data.get('username')
     user, _ = User.objects.get_or_create(
         email=email,
         username=username)

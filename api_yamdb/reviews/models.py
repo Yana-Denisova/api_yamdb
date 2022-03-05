@@ -14,15 +14,18 @@ class User(AbstractUser):
         (ADMIN, 'admin'))
     username = models.CharField(
         max_length=150, validators=[RegexValidator(regex=r'^[\w.@+-]+\Z')],
-        unique=True, blank=False, null=False)
+        unique=True, blank=False, null=False, verbose_name='Имя пользователя')
     email = models.EmailField(
-        max_length=254, unique=True, blank=False, null=False)
+        max_length=254, unique=True, blank=False,
+        null=False, verbose_name='Email')
     bio = models.TextField(max_length=500, blank=True, verbose_name='О себе')
     role = models.CharField(
         max_length=50, choices=ROLES, default=USER, verbose_name='Роль')
 
     class Meta:
         ordering = ['username']
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'
 
     def __str__(self):
         return self.username
@@ -63,17 +66,19 @@ class Category(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=200)
-    year = models.IntegerField()
+    name = models.CharField(max_length=200, db_index=True)
+    year = models.IntegerField(db_index=True)
     description = models.TextField()
     genre = models.ManyToManyField(
         Genre,
         related_name="titles",
-        verbose_name="жанр")
+        verbose_name="жанр",
+        db_index=True)
     category = models.ForeignKey(
         Category,
         related_name="titles",
         verbose_name="категория",
+        db_index=True,
         on_delete=models.CASCADE)
     
     class Meta:

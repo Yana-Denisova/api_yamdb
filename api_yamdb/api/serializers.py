@@ -15,6 +15,13 @@ class SendCodeSerializer(serializers.Serializer):
                 'Нельзя создвать пользователя "me"')
         return value
 
+    def validate(self, data):
+        if (User.objects.filter(email=data['email']).first()
+           != User.objects.filter(username=data['username']).first()):
+            raise serializers.ValidationError(
+                'Имя не соответствует email')
+        return data
+
 
 class SendTokenSerializer(serializers.Serializer):
     username = serializers.CharField()
