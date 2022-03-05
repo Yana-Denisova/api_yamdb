@@ -35,7 +35,7 @@ class User(AbstractUser):
         return self.role == self.MODERATOR
 
 
-class Genres(models.Model):
+class Genre(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
@@ -46,7 +46,7 @@ class Genres(models.Model):
         return self.name
 
 
-class Categories(models.Model):
+class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
 
@@ -62,10 +62,10 @@ class Title(models.Model):
     year = models.IntegerField()
     description = models.TextField()
     genre = models.ManyToManyField(
-        Genres,
+        Genre,
         related_name="titles")
     category = models.ForeignKey(
-        Categories,
+        Category,
         related_name="titles",
         on_delete=models.CASCADE)
 

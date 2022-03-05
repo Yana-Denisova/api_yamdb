@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import (LimitOffsetPagination,
@@ -12,7 +12,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Categories, Genres, Review, Title, User
+from.mixins import CreateListDeleteViewSet
+from reviews.models import Category, Genre, Review, Title, User
 from .filters import TitlesFilter
 from .permissions import AuthorAdminModerOrReadOnly, IsAdminRole, IsReadOnly
 from .serializers import (CategoriesSerializer, CommentSerializer,
@@ -89,15 +90,8 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class CreateListDeleteViewSet(mixins.CreateModelMixin,
-                              mixins.ListModelMixin,
-                              mixins.DestroyModelMixin,
-                              viewsets.GenericViewSet):
-    pass
-
-
 class GenresViewSet(CreateListDeleteViewSet):
-    queryset = Genres.objects.all()
+    queryset = Genre.objects.all()
     serializer_class = GenresSerializer
     permission_classes = [IsReadOnly | IsAdminRole]
     pagination_class = PageNumberPagination
@@ -107,7 +101,7 @@ class GenresViewSet(CreateListDeleteViewSet):
 
 
 class CategoriesViewSet(CreateListDeleteViewSet):
-    queryset = Categories.objects.all()
+    queryset = Category.objects.all()
     serializer_class = CategoriesSerializer
     permission_classes = [IsReadOnly | IsAdminRole]
     pagination_class = PageNumberPagination
