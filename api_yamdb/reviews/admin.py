@@ -41,7 +41,7 @@ admin.site.register(User, CustomUserAdmin)
 
 
 class TitleAdmin(admin.ModelAdmin):
-    list_display = ('name', 'year', 'description', 'genre', 'category')
+    list_display = ('name', 'year', 'description', 'category')
     list_filter = ('year', 'genre', 'category')
     search_fields = ('name',)
     empty_value_display = '-пусто-'
